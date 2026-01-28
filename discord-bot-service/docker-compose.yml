@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  # --- 🐘 PostgreSQL (Database หลัก) ---
+  postgres:
+    image: postgres:14-alpine
+    container_name: nest_postgres
+    restart: always
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: mysecretpassword
+      POSTGRES_DB: address_bot_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # --- 🔴 Redis (ความจำชั่วคราวสำหรับบอท) ---
+  redis:
+    image: redis:alpine
+    container_name: nest_redis
+    restart: always
+    ports:
+      - '6379:6379'
+
+volumes:
+  postgres_data:

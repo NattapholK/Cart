@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// --- 1. ตารางผู้ใช้งาน (เก็บข้อมูลพื้นฐานจาก Discord) ---
+model User {
+  id         Int       @id @default(autoincrement())
+  discordId  String    @unique // ID ของ User ใน Discord
+  username   String?   // ชื่อ Username
+  avatar     String?   // เผื่อในอนาคตจะดึงรูปโปรไฟล์มาแสดงในเว็บ
+  addresses  Address[] // เชื่อมไปหาตารางที่อยู่
+  logs       BotLog[]  // เก็บประวัติการใช้งานของ User คนนี้
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+// --- 2. ตารางที่อยู่ (ขยายให้เก็บประเภทที่อยู่ได้) ---
+model Address {
+  id          Int      @id @default(autoincrement())
+  label       String   @default("บ้าน") // เช่น บ้าน, ที่ทำงาน, คอนโด
+  fullName    String   // ชื่อ-นามสกุล ผู้รับ
+  fullAddress String   // ที่อยู่ละเอียด
+  phoneNumber String   // เบอร์โทร
+  isDefault   Boolean  @default(false) // เผื่อทำระบบเลือกที่อยู่หลัก
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// --- 3. ตารางเก็บ Log (สำคัญมาก! เอาไว้ตรวจสอบว่าบอททำงานพลาดตรงไหน) ---
+model BotLog {
+  id        Int      @id @default(autoincrement())
+  action    String   // เช่น "SAVE_ADDRESS", "DELETE_ADDRESS"
+  details   String?  // รายละเอียดเพิ่มเติม (JSON string หรือข้อความ)
+  userId    Int?
+  user      User?    @relation(fields: [userId], references: [id])
+  status    String   @default("SUCCESS") // SUCCESS หรือ FAILED
+  createdAt DateTime @default(now())
+}
+
+// --- 4. ตารางตั้งค่าบอท (System Config) ---
+// เผื่อในอนาคตอยากเปลี่ยนข้อความทักทาย หรือเปิด-ปิดระบบ โดยไม่ต้องแก้ Code
+model SystemConfig {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique // เช่น "WELCOME_MESSAGE"
+  value     String
+  updatedAt DateTime @updatedAt
+}

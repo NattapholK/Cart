@@ -1,0 +1,13 @@
+{
+    "typescript.validate.enable": true,
+    "javascript.validate.enable": false,
+    "files.exclude": {
+        "**/dist": false
+    },
+    "search.exclude": {
+        "**/dist": true
+    },
+    "files.watcherExclude": {
+        "**/dist/**": true
+    }
+}

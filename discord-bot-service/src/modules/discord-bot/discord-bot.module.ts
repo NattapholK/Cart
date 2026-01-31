@@ -6,4 +6,4 @@ import { AddressModule } from '../address/address.module';
   imports: [AddressModule],
   providers: [DiscordBotService],
 })
-export class DiscordBotModule {}
+export class DiscordBotModule { }

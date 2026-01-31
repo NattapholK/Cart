@@ -5,7 +5,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 export class AddressService {
   private readonly logger = new Logger(AddressService.name);
 
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   /**
    * ก้อนที่ 1: บันทึกหรืออัปเดตข้อมูลผู้ใช้พร้อมที่อยู่ใหม่
@@ -71,8 +71,8 @@ export class AddressService {
       },
       orderBy: {
         createdAt: 'desc',
-      },
-    });
+      }, // <-- ปิดปีกกาของ orderBy
+    });  // <-- ปิดปีกกาของ findMany และปิดวงเล็บ
   }
 
   /**

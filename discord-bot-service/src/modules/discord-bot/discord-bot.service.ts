@@ -1,10 +1,10 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config'; // นำเข้า ConfigService
 import { Client, GatewayIntentBits, Message } from 'discord.js';
 import { AddressService } from '../address/address.service';
 
 @Injectable()
-export class DiscordBotService implements OnModuleInit {
+export class DiscordBotService implements OnModuleInit, OnModuleDestroy {
   private client: Client;
 
   constructor(
@@ -38,14 +38,65 @@ export class DiscordBotService implements OnModuleInit {
     console.log('✅ บอทออนไลน์ผ่านระบบ Config เรียบร้อยละเพื่อน');
   }
 
-  async handleMessage(message: Message) {
-    if (message.author.bot) return; //เอาไว้กันบอทกวนตีน ถ้าเป็นบอทสงข้อความมาไม่ต้องทำอะไรเลย
-
-    if (message.content === '!check') {
-      const data = await this.addressService.getAddressesByDiscordId(
-        message.author.id,
-      );
-      await message.reply(`เจอที่อยู่ทั้งหมด ${data.length} รายการครับ`);
+  async onModuleDestroy() {
+    console.log('กำลังตัดการเชื่อมต่อจาก Discord🔌');
+    if (this.client) {
+      this.client.destroy(); //อันนี้เอาไว้สั่งปิดบอท
     }
+    console.log('✅ บอทออฟไลน์เรียบร้อยครับผม')
+  }
+
+  async handleMessage(message: Message) {
+    if (message.author.bot) return;
+
+    // 1. คำสั่งตรวจสอบที่อยู่ (Check)
+    if (message.content === '!check') {
+      const addresses = await this.addressService.getAddressesByDiscordId(message.author.id);
+      if (addresses.length === 0) {
+        return message.reply('📭 คุณยังไม่มีที่อยู่ที่บันทึกไว้เลยครับ');
+      }
+      const list = addresses.map((addr, index) =>
+        `**${index + 1}. ${addr.fullName}**\n📍 ${addr.fullAddress}\n📞 ${addr.phoneNumber}\n🆔 ID: \`${addr.id}\``
+      ).join('\n' + '─'.repeat(20) + '\n');
+      await message.reply(`📋 **รายการที่อยู่ของคุณ:**\n\n${list}`);
+    }
+
+    // 2. คำสั่งบันทึกที่อยู่ (Save)
+    else if (message.content.startsWith('!save')) {
+      const content = message.content.replace('!save', '').trim();
+      const parts = content.split('|').map((p) => p.trim());
+
+      if (parts.length < 3) {
+        return message.reply('❌ รูปแบบผิด! กรุณาใช้: `!save ชื่อจริง | ที่อยู่ | เบอร์โทร`');
+      }
+
+      const [fullName, fullAddress, phoneNumber] = parts;
+      try {
+        await this.addressService.saveAddress(message.author.id, message.author.username, {
+          fullName,
+          fullAddress,
+          phoneNumber,
+        });
+        await message.reply(`✅ บันทึกที่อยู่ของคุณ **${fullName}** เรียบร้อย!`);
+      } catch (error) {
+        await message.reply('🚨 เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+      }
+    }
+
+    else if (message.content.startsWith('!delete')) {
+      const addressId = parseInt(message.content.replace('!delete', '').trim());
+      if (isNaN(addressId)) {
+        return message.reply('กรุณาใส่ ID เป็นตัวเลข (ดูIDจาก !check)');
+      }
+      try {
+        await this.addressService.deleteAddress(addressId);
+        await message.reply(`🗑️ ลบที่อยู่ \`${addressId}\` เรียบร้อยแล้วครับบบ!`);
+      }
+      catch (error) {
+        await message.reply('ไม่พบรหัสที่อยู่นี้หรือคุณไม่สีสิทธิ์ลบครับ')
+      }
+    }
+
+
   }
 }

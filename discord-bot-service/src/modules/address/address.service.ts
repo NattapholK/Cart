@@ -78,9 +78,14 @@ export class AddressService {
   /**
    * ก้อนที่ 3: ลบที่อยู่
    */
-  async deleteAddress(addressId: number) {
-    return this.prisma.address.delete({
-      where: { id: addressId },
+  // ใน AddressService.ts
+  async deleteAddressByOwner(discordId: string) {
+    return this.prisma.address.deleteMany({
+      where: {
+        user: {
+          discordId: discordId // ลบทุกที่อยู่ที่เชื่อมกับ Discord ID นี้
+        }
+      },
     });
   }
 }

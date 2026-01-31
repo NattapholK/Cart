@@ -83,18 +83,19 @@ export class DiscordBotService implements OnModuleInit, OnModuleDestroy {
       }
     }
 
-    else if (message.content.startsWith('!delete')) {
-      const addressId = parseInt(message.content.replace('!delete', '').trim());
-      if (isNaN(addressId)) {
-        return message.reply('กรุณาใส่ ID เป็นตัวเลข (ดูIDจาก !check)');
-      }
+
+    else if (message.content === '!delete') {
       try {
-        await this.addressService.deleteAddress(addressId);
-        await message.reply(`🗑️ ลบที่อยู่ \`${addressId}\` เรียบร้อยแล้วครับบบ!`);
-      }
-      catch (error) {
-        await message.reply('ไม่พบรหัสที่อยู่นี้หรือคุณไม่สีสิทธิ์ลบครับ')
-      }
+        const result = await this.addressService.deleteAddressByOwner(message.author.id);
+
+        if (result.count === 0) {
+          return message.reply('📭 คุณยังไม่มีข้อมูลที่อยู่ในระบบให้ลบเลยครับ');
+        }
+
+        await message.reply(`🗑️ ลบข้อมูลที่อยู่ทั้งหมดของคุณเรียบร้อยแล้วครับ (${result.count} รายการ)`);
+      } catch (error) {
+        await message.reply('🚨 เกิดข้อผิดพลาดในการลบข้อมูลครับ');
+      }//อิงจาก UserId Discord ของผู้ใช้ไปเลยปลอดภัยกว่า จะได้ลบได้แค่ของตัวเอง
     }
 
 

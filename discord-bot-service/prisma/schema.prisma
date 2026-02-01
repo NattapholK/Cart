@@ -25,6 +25,7 @@ model Address {
   fullName    String   // ชื่อ-นามสกุล ผู้รับ
   fullAddress String   // ที่อยู่ละเอียด
   phoneNumber String   // เบอร์โทร
+  email       String   // อีเมล
   isDefault   Boolean  @default(false) // เผื่อทำระบบเลือกที่อยู่หลัก
   userId      Int
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)

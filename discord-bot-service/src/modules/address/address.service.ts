@@ -13,7 +13,7 @@ export class AddressService {
   async saveAddress(
     discordId: string,
     username: string,
-    addressData: { fullName: string; fullAddress: string; phoneNumber: string },
+    addressData: { fullName: string; fullAddress: string; phoneNumber: string; email: string },
   ) {
     try {
       this.logger.log(`กำลังบันทึกที่อยู่ให้ User: ${username} (${discordId})`);
@@ -27,6 +27,7 @@ export class AddressService {
               fullName: addressData.fullName,
               fullAddress: addressData.fullAddress,
               phoneNumber: addressData.phoneNumber,
+              email: addressData.email, // เพิ่งเพิ่ม email เข้ามาใหม่
             },
           },
         },
@@ -38,6 +39,7 @@ export class AddressService {
               fullName: addressData.fullName,
               fullAddress: addressData.fullAddress,
               phoneNumber: addressData.phoneNumber,
+              email: addressData.email, // เพิ่งเพิ่ม email เข้ามาใหม่ครับ
             },
           },
         },

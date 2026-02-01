@@ -218,10 +218,16 @@ export class DiscordBotService implements OnModuleInit, OnModuleDestroy {
 
     // ... (Generate List Logic: แปลง Array เป็น String สวยๆ) ...
     const list = addresses
-      .map((addr: any, i: number) => `**${i + 1}.** ${addr.fullName}`)
-      .join('\n');
+      .map((addr: any, i: number) =>
+        `**รายการที่ ${i + 1}**\n` +
+        `👤 **ชื่อ:** ${addr.fullName}\n` +
+        `🏠 **ที่อยู่:** ${addr.fullAddress}\n` +
+        `📞 **เบอร์:** ${addr.phoneNumber}\n` +
+        `📧 **อีเมล:** ${addr.email}`
+      )
+      .join('\n\n--------------------------------\n\n');
 
-    await interaction.reply(`📋 **ข้อมูลของคุณ:**\n${list}`);
+    await interaction.reply(`📋 **ข้อมูลของคุณ:**\n\n${list}`);
   }
 
   private async handleDeleteCommand(interaction: ChatInputCommandInteraction, isDM: boolean) {
